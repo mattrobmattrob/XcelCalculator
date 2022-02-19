@@ -1,4 +1,3 @@
-import Head from 'next/head'
 import { useState } from 'react'
 const lodash = require("lodash");
 
@@ -89,17 +88,29 @@ export default function Home() {
                 'Savings',
             ])
             tableData.push(content[0]);
+
+            var onPeakTotal = 0;
+            var midPeakTotal = 0;
+            var offPeakTotal = 0;
+            var totalEnergyTotal = 0;
+            var touCostTotal = 0;
+            var optOutCostTotal = 0;
+            var savingsTotal = 0;
             for (let i = 1; i < content.length; i++) {
                 // Table rows
                 const rowData = content[i];
                 const date = rowData[0];
                 const dateString = date.split(" 00:00:00")[0];
                 const onPeak = +(rowData[1]);
+                onPeakTotal += onPeak;
                 const midPeak = +(rowData[2]);
+                midPeakTotal += midPeak;
                 const offPeak = +(rowData[3]);
+                offPeakTotal += offPeak;
 
                 // Add Total Energy
                 const totalEnergy = (onPeak + midPeak + offPeak);
+                totalEnergyTotal += totalEnergy;
 
                 // Add TOU cost
                 //
@@ -116,12 +127,14 @@ export default function Home() {
                 //   Mid-Peak = 19 cents per kWh
                 //   Off-Peak = 10 cents per kWh
                 const touCost = (onPeak * 0.17) + (midPeak * 0.14) + (offPeak * 0.10);
+                touCostTotal += touCost;
 
                 // Add Smart Meter opt-out cost
                 // 
                 // Winter = 12 cents per kWh
                 // Summer = 14 cents per kWh
                 const optOutCost = totalEnergy * 0.14;
+                optOutCostTotal += optOutCost;
 
                 // TOU vs. Opt-Out
                 const savings = touCost - optOutCost;
@@ -131,6 +144,7 @@ export default function Home() {
                 } else {
                     savingsColumn = "$" + savings.toFixed(2);
                 }
+                savingsTotal += savings;
 
                 tableData.push([
                     dateString,
@@ -143,6 +157,23 @@ export default function Home() {
                     savingsColumn,
                 ]);
             }
+
+            var savingsTotalColumn = '';
+            if (savingsTotal < 0) {
+                savingsTotalColumn = "-$" + (savingsTotal.toFixed(2) * -1);
+            } else {
+                savingsTotalColumn = "$" + savingsTotal.toFixed(2);
+            }
+            tableData.push([
+                'Totals:',
+                onPeakTotal.toFixed(2),
+                midPeakTotal.toFixed(2),
+                offPeakTotal.toFixed(2),
+                totalEnergyTotal.toFixed(2),
+                "$" + touCostTotal.toFixed(2),
+                "$" + optOutCostTotal.toFixed(2),
+                savingsTotalColumn
+            ]);
 
             setCsvData(tableData);
         };

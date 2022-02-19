@@ -215,17 +215,13 @@ export default function Home() {
     };
 
   return <>
-    <div className='text-3xl font-bold text-red-500 pb-4'>
-        Xcel Energy Time of Use (TOU) Calculator
-    </div>
+    <div className='text-3xl font-bold text-red-500 pb-4'>Xcel Energy Time of Use (TOU) Calculator</div>
 
     <div className='pb-3'>
         This will parse the CSV file downloaded from <a className='text-blue-500' href="https://myenergy.xcelenergy.com/myenergy/usage-history">Xcel Energy's MyEnergy</a> that contains the daily usage information split out by time-of-use buckets (peak, mid-peak, and off-peak).
     </div>
 
-    <div className='text-xl font-bold pb-3'>
-        Upload CSV file from Xcel with daily data:
-    </div>
+    <div className='pb-3'>Upload CSV file from Xcel with daily data:</div>
     <input type="file" id="myFile" name="myFile" onChange={fileUploaded}></input>
   </>
 }

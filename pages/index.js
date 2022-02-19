@@ -128,7 +128,7 @@ export default function Home() {
       document.body.appendChild(data);
   }
 
-  const fileUploaded = () => {
+  function fileUploaded() {
       console.log("FILE UPLOADED")
       const reader = new FileReader();
       reader.onload = function(event) {
@@ -142,12 +142,10 @@ export default function Home() {
       reader.readAsText(document.getElementById("myFile").files[0]);
   };
 
-  return <div>
-    <h1>Xcel Energy Time of Use (TOU) Calculator</h1>
+  return <>
+    <div className='text-3xl font-bold text-red-500 pb-4'>Xcel Energy Time of Use (TOU) Calculator</div>
 
-    <h3>Upload CSV file from Xcel with daily data:</h3>
+    <div className='pb-3'>Upload CSV file from Xcel with daily data:</div>
     <input type="file" id="myFile" name="myFile" onChange={fileUploaded}></input>
-    <br></br>
-    <br></br>
-  </ div>
+  </>
 }

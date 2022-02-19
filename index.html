@@ -379,118 +379,147 @@
         return( arrData );
     }
 
-    function createHTMLFromCSVData(csvData) {
-        var data = document.createElement('table');
+    function Day(date, onPeak, midPeak, offPeak) {
+        this.date = date;
+        this.onPeak = onPeak;
+        this.midPeak = midPeak;
+        this.offPeak = offPeak;
+        this.totalEnergy = onPeak + midPeak + offPeak
+        // Add TOU cost
+        //
+        // Times (weekdays, non-holidays):
+        //   On-Peak is 3 p.m. -7 p.m.
+        //   Mid-Peak is 1 p.m.-3 p.m.
+        //   Off-Peak is 7 p.m.- 1 p.m.
+        // Winter Prices:
+        //   On-Peak = 17 cents per kWh
+        //   Mid-Peak = 14 cents per kWh
+        //   Off-Peak = 10 cents per kWh
+        // Summer Prices:
+        //   On-Peak = 28 cents per kWh
+        //   Mid-Peak = 19 cents per kWh
+        //   Off-Peak = 10 cents per kWh
+        this.touCost = (onPeak * 0.17) + (midPeak * 0.14) + (offPeak * 0.10);
+        // Add Smart Meter opt-out cost
+        // 
+        // Winter = 12 cents per kWh
+        // Summer = 14 cents per kWh
+        this.optOutCost = this.totalEnergy * 0.14;
+        // TOU vs. Opt-Out
+        this.savings = this.touCost - this.optOutCost;
+    }
+
+    function ArrayToStructures(data) {
+        const days = [];
+        for (let i = 1; i < data.length; i++) {
+            const currentData = data[i];
+            const date = currentData[0];
+            const dateString = date.split(" 00:00:00")[0];
+
+            days.push(new Day(
+                dateString,
+                +(currentData[1]),
+                +(currentData[2]),
+                +(currentData[3])
+            ));
+        }
+
+        return days
+    }
+
+    function createHeaderColumn(text) {
+        var column = document.createElement('th');
+        column.textContent = text;
+        return column
+    }
+
+    function createHTMLFromData(data) {
+        var table = document.createElement('table');
 
         // Table headers
         var tableHeaders = document.createElement('tr');
-        var labels = csvData[0];
-        for (let i = 0; i < labels.length; i++) {
-            var header = document.createElement('th');
-            if (labels[i] == "Category") {
-                header.textContent = "Day";
-            } else {
-                header.textContent = labels[i];
-            }
-            tableHeaders.appendChild(header);
-        }
-        // Add Total Energy
-        var totalEnergyHeader = document.createElement('th');
-        totalEnergyHeader.textContent = "Total Energy (kWh)";
-        tableHeaders.appendChild(totalEnergyHeader);
-        // Add TOU Cost
-        var touHeader = document.createElement('th');
-        touHeader.textContent = "TOU Cost";
-        tableHeaders.appendChild(touHeader);
-        // Add Opt Out Cost
-        var optOutHeader = document.createElement('th');
-        optOutHeader.textContent = "Opt-Out Cost";
-        tableHeaders.appendChild(optOutHeader);
-        // Add Savings
-        var savingsHeader = document.createElement('th');
-        savingsHeader.textContent = "Savings";
-        tableHeaders.appendChild(savingsHeader);
-        // Add headers to table
-        data.appendChild(tableHeaders);
+
+        tableHeaders.appendChild(createHeaderColumn("Date"));
+        tableHeaders.appendChild(createHeaderColumn("On Peak"));
+        tableHeaders.appendChild(createHeaderColumn("Mid Peak"));
+        tableHeaders.appendChild(createHeaderColumn("Off Peak"));
+        tableHeaders.appendChild(createHeaderColumn("Total Energy (kWh)"));
+        tableHeaders.appendChild(createHeaderColumn("TOU Cost"));
+        tableHeaders.appendChild(createHeaderColumn("Opt-Out Cost"));
+        tableHeaders.appendChild(createHeaderColumn("Savings"));
+        table.appendChild(tableHeaders);
 
         // Table rows
-        for (let i = 1; i < csvData.length; i++) { 
+
+        function createRow(data) {
             var tableRow = document.createElement('tr');
-            const rowData = csvData[i]
 
-            // Date
-            const date = rowData[0];
-            const dateString = date.split(" 00:00:00")[0];
-            var dateColumn = document.createElement('td');
-            dateColumn.textContent = dateString;
-            tableRow.appendChild(dateColumn);
-
-            // On Peak
-            const onPeak = +(rowData[1]);
-            var onPeakColumn = document.createElement('td');
-            onPeakColumn.textContent = onPeak.toFixed(2);
-            tableRow.appendChild(onPeakColumn);
-
-            // Mid Peak
-            const midPeak = +(rowData[2]);
-            var midPeakColumn = document.createElement('td');
-            midPeakColumn.textContent = midPeak.toFixed(2);
-            tableRow.appendChild(midPeakColumn);
-
-            // Off Peak
-            const offPeak = +(rowData[3]);
-            var offPeakColumn = document.createElement('td');
-            offPeakColumn.textContent = offPeak.toFixed(2);
-            tableRow.appendChild(offPeakColumn);
-
-            // Add Total Energy
-            const totalEnergy = (onPeak + midPeak + offPeak);
-            var totalEnergyColumn = document.createElement('td');
-            totalEnergyColumn.textContent = totalEnergy.toFixed(2);
-            tableRow.appendChild(totalEnergyColumn);
-
-            // Add TOU cost
-            //
-            // Times (weekdays, non-holidays):
-            //   On-Peak is 3 p.m. -7 p.m.
-            //   Mid-Peak is 1 p.m.-3 p.m.
-            //   Off-Peak is 7 p.m.- 1 p.m.
-            // Winter Prices:
-            //   On-Peak = 17 cents per kWh
-            //   Mid-Peak = 14 cents per kWh
-            //   Off-Peak = 10 cents per kWh
-            // Summer Prices:
-            //   On-Peak = 28 cents per kWh
-            //   Mid-Peak = 19 cents per kWh
-            //   Off-Peak = 10 cents per kWh
-            const touCost = (onPeak * 0.17) + (midPeak * 0.14) + (offPeak * 0.10);
-            var touCostColumn = document.createElement('td');
-            touCostColumn.textContent = "$" + touCost.toFixed(2);
-            tableRow.appendChild(touCostColumn);
-
-            // Add Smart Meter opt-out cost
-            // 
-            // Winter = 12 cents per kWh
-            // Summer = 14 cents per kWh
-            const optOutCost = totalEnergy * 0.14;
-            var optOutCostColumn = document.createElement('td');
-            optOutCostColumn.textContent = "$" + optOutCost.toFixed(2);
-            tableRow.appendChild(optOutCostColumn);
-
-            // TOU vs. Opt-Out
-            const savings = touCost - optOutCost;
-            var savingsColumn = document.createElement('td');
-            if (savings < 0) {
-                savingsColumn.textContent = "-$" + (savings.toFixed(2) * -1);
-            } else {
-                savingsColumn.textContent = "$" + savings.toFixed(2);
+            function createElement(text) {
+                var element = document.createElement('td');
+                element.textContent = text;
+                return element
             }
-            tableRow.appendChild(savingsColumn);
 
-            data.appendChild(tableRow);
+            tableRow.appendChild(createElement(data.date));
+            tableRow.appendChild(createElement(data.onPeak.toFixed(2)));
+            tableRow.appendChild(createElement(data.midPeak.toFixed(2)));
+            tableRow.appendChild(createElement(data.offPeak.toFixed(2)));
+            tableRow.appendChild(createElement(data.totalEnergy.toFixed(2)));
+            tableRow.appendChild(createElement("$ " + data.touCost.toFixed(2)));
+            tableRow.appendChild(createElement("$ " + data.optOutCost.toFixed(2)));
+            tableRow.appendChild(createElement("$ " + data.savings.toFixed(2)));
+
+            return tableRow
         }
 
-        document.body.appendChild(data);
+        for (let i = 0; i < data.length; i++) { 
+            table.appendChild(createRow(data[i]));
+        }
+
+        document.body.appendChild(table);
+    }
+
+    function createSummaryHTMLFromData(data) {
+        var table = document.createElement('table');
+
+        // Table headers
+        var tableHeaders = document.createElement('tr');
+        tableHeaders.appendChild(createHeaderColumn("Energy"));
+        tableHeaders.appendChild(createHeaderColumn("TOU Cost"));
+        tableHeaders.appendChild(createHeaderColumn("Opt-Out Cost"));
+        tableHeaders.appendChild(createHeaderColumn("Savings"));
+        table.appendChild(tableHeaders);
+
+        // Table rows
+
+        var totalEnergy = 0
+        var totalTOUCost = 0
+        var totalOptOutCost = 0
+        var totalSavings = 0
+        for (let i = 0; i < data.length; i++) { 
+            const day = data[i]
+            totalEnergy += day.totalEnergy
+            totalTOUCost += day.touCost
+            totalOptOutCost += day.optOutCost
+            totalSavings += day.savings
+        }
+
+        var tableRow = document.createElement('tr');
+
+        function createElement(text) {
+            var element = document.createElement('td');
+            element.textContent = text;
+            return element
+        }
+
+        tableRow.appendChild(createElement(totalEnergy.toFixed(2) + " kWh"))
+        tableRow.appendChild(createElement("$" + totalTOUCost.toFixed(2)))
+        tableRow.appendChild(createElement("$" + totalOptOutCost.toFixed(2)))
+        tableRow.appendChild(createElement("$" + totalSavings.toFixed(2)))
+
+        table.appendChild(tableRow)
+
+        document.body.appendChild(table);
     }
 
     function fileUploaded() {
@@ -503,7 +532,11 @@
             var content = CSVToArray(event.target.result, ",")
             console.log(content)
 
-            createHTMLFromCSVData(content)
+            const data = ArrayToStructures(content)
+
+            createHTMLFromData(data);
+            document.body.appendChild(document.createElement('br'));
+            createSummaryHTMLFromData(data);
         };
         reader.readAsText(document.getElementById("myFile").files[0]);
     };

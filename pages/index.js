@@ -174,14 +174,14 @@ export default function Home() {
                                 if (row_idx == 1) {
                                     return <th
                                         key={cell_idx}
-                                        className='text-left p-2 border-b-2 border-black'
+                                        className='text-left p-1 border-b-2 border-black'
                                     >
                                         {cell}
                                     </th>
                                 } else {
                                     return <td
                                         key={cell_idx}
-                                        className='p-2 border-b-2 border-gray-100'
+                                        className='p-1 border-2 border-gray-200'
                                     >
                                         {cell}
                                     </td>

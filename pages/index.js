@@ -159,10 +159,12 @@ export default function Home() {
                 This will parse the CSV file downloaded from <a className='text-blue-500' href="https://myenergy.xcelenergy.com/myenergy/usage-history">Xcel Energy's MyEnergy</a> that contains the daily usage information split out by time-of-use buckets (peak, mid-peak, and off-peak).
             </div>
 
-            <div className='text-xl font-bold pb-3'>
-                Upload CSV file from Xcel with daily data:
+            <div className='flex'>
+                <div className='text-xl font-bold pb-3 pr-3'>
+                    Upload CSV file from Xcel with daily data:
+                </div>
+                <input type="file" id="myFile" name="myFile" onChange={fileUploaded} />
             </div>
-            <input type="file" id="myFile" name="myFile" onChange={fileUploaded}></input>
 
             <table>
                 {lodash.map(csvData, (row, row_idx) => {

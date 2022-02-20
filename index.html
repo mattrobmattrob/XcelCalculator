@@ -284,7 +284,18 @@
 
 <div class="text-3xl font-bold text-red-500 pb-4">Xcel Energy Time of Use (TOU) Calculator</div>
 
-<div class="pb-3">This will parse the CSV file downloaded from <a class="text-blue-500" href="https://myenergy.xcelenergy.com/myenergy/usage-history">Xcel Energy's MyEnergy</a> that contains the daily usage information split out by time-of-use buckets (peak, mid-peak, and off-peak).</div>
+<div class="pb-3">This will parse the CSV file downloaded from Xcel Energy's MyEnergy that contains the daily usage information split out by time-of-use buckets (peak, mid-peak, and off-peak).</div>
+
+<div class="pb-3">
+1. Log in to Xcel then go to <a class="text-blue-500" href="https://myenergy.xcelenergy.com/myenergy/usage-history">Xcel Energy's MyEnergy</a>.
+<br>
+2. Select your non-legacy electric meter and "By Day".
+<br>
+3. Click the "Download" button and select CSV.
+<br>
+4. Upload using the "Choose File" button below.
+<br>
+</div>
 
 <div class="text-xl font-bold pb-3">Upload CSV file from Xcel with daily data:</div>
 <input type="file" id="myFile" name="myFile">
@@ -537,6 +548,8 @@
             createHTMLFromData(data);
             document.body.appendChild(document.createElement('br'));
             createSummaryHTMLFromData(data);
+            document.body.appendChild(document.createElement('br'));
+            document.body.appendChild(document.createElement('br'));
         };
         reader.readAsText(document.getElementById("myFile").files[0]);
     };

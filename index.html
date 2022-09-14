@@ -390,32 +390,112 @@
         return( arrData );
     }
 
+    // Expected date format is '2022-08-15'.
+    function isWinter(date) {
+        // Bills seem to show that the summer switchover happens in June
+        // and goes until at least September.
+        const month = date.split("-")[1];
+        switch(month) {
+        case "01":
+            return true;
+        case "02":
+            return true;
+        case "03":
+            return true;
+        case "04":
+            return true;
+        case "05":
+            return true;
+        case "06":
+            return false;
+        case "07":
+            return false;
+        case "08":
+            return false;
+        case "09":
+            return false;
+        case "10":
+            return true;
+        case "11":
+            return true;
+        case "12":
+            return true;
+        }
+    }
+
+    // Expected date format is '2022-08-15'.
+    function isWeekend(date) {
+        switch (new Date(date).getDay()) {
+        case 5: // Saturday
+            return true;
+        case 6: // Sunday
+            return true;
+        default: // Weekday
+            return false;
+        }
+    }
+
     function Day(date, onPeak, midPeak, offPeak) {
+        console.log(date);
+
         this.date = date;
         this.onPeak = onPeak;
         this.midPeak = midPeak;
         this.offPeak = offPeak;
         this.totalEnergy = onPeak + midPeak + offPeak
-        // Add TOU cost
+        // Add TOU cost (https://www.xcelenergy.com/staticfiles/xe-responsive/Company/Rates%20&%20Regulations/Electric-Summation-Sheet-All-Rates-07.01.22.pdf)
         //
+        // General Residential Pricing
+        // Winter Price:
+        //   12 cents per kWh
+        const winterRate = 0.12491;
+        // Summer Price:
+        //   14 cents per kWh
+        const summerRate = 0.13735;
+        //
+        // Time of Use
         // Times (weekdays, non-holidays):
         //   On-Peak is 3 p.m. -7 p.m.
         //   Mid-Peak is 1 p.m.-3 p.m.
         //   Off-Peak is 7 p.m.- 1 p.m.
         // Winter Prices:
-        //   On-Peak = 17 cents per kWh
-        //   Mid-Peak = 14 cents per kWh
-        //   Off-Peak = 10 cents per kWh
+        //  On-Peak = 17.7 cents per kWh
+        const winterRate_onPeak = 0.17723;
+        //  Mid-Peak = 14.2 cents per kWh
+        const winterRate_midPeak = 0.14201;
+        //  Off-Peak = 10.7 cents per kWh
+        const winterRate_offPeak = 0.10678;
         // Summer Prices:
-        //   On-Peak = 28 cents per kWh
-        //   Mid-Peak = 19 cents per kWh
-        //   Off-Peak = 10 cents per kWh
-        this.touCost = (onPeak * 0.17) + (midPeak * 0.14) + (offPeak * 0.10);
+        //  On-Peak = 27.8 cents per kWh
+        const summerRate_onPeak = 0.27788;
+        //  Mid-Peak = 19.2 cents per kWh
+        const summerRate_midPeak = 0.19232;
+        //  Off-Peak = 10.7 cents per kWh
+        const summerRate_offPeak = 0.10678;
+        if (isWeekend(date)) {
+            // Normal rate structure
+            if (isWinter(date)) {
+                this.touCost = this.totalEnergy * winterRate;
+            } else {
+                this.touCost = this.totalEnergy * summerRate;
+            }
+        } else {
+            // TOU rate structure
+            if (isWinter(date)) {
+                this.touCost = (onPeak * winterRate_onPeak) + (midPeak * winterRate_midPeak) + (offPeak * winterRate_offPeak);
+            } else {
+                this.touCost = (onPeak * summerRate_onPeak) + (midPeak * summerRate_midPeak) + (offPeak * summerRate_offPeak);
+            }
+        }
         // Add Smart Meter opt-out cost
         // 
         // Winter = 12 cents per kWh
         // Summer = 14 cents per kWh
-        this.optOutCost = this.totalEnergy * 0.14;
+        if (isWinter(date)) {
+            this.optOutCost = this.totalEnergy * winterRate;
+        } else {
+            this.optOutCost = this.totalEnergy * summerRate;
+        }
         // TOU vs. Opt-Out
         this.savings = this.touCost - this.optOutCost;
     }
